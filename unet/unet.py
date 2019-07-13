@@ -83,19 +83,22 @@ class UNet(nn.Module):
 
 
 class UNet2D(UNet):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **user_kwargs):
+        kwargs = {}
         kwargs['dimensions'] = 2
         kwargs['num_encoding_blocks'] = 5
         kwargs['out_channels_first_layer'] = 64
+        kwargs.update(user_kwargs)
         super().__init__(*args, **kwargs)
 
 
 class UNet3D(UNet):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **user_kwargs):
         kwargs['dimensions'] = 3
         kwargs['num_encoding_blocks'] = 4
         kwargs['out_channels_first_layer'] = 32
         kwargs['normalization'] = 'batch'
+        kwargs.update(user_kwargs)
         super().__init__(*args, **kwargs)
 
 
