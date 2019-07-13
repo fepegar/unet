@@ -170,7 +170,7 @@ class EncodingBlock(nn.Module):
         self.preactivation = preactivation  # needed for out_channels propoerty
 
         if is_first_block:
-            self.conv1 = get_conv_block(
+            self.conv1 = ConvolutionalBlock(
                 dimensions,
                 in_channels,
                 out_channels_first,
@@ -178,7 +178,7 @@ class EncodingBlock(nn.Module):
                 activation=None,
             )
         else:
-            self.conv1 = get_conv_block(
+            self.conv1 = ConvolutionalBlock(
                 dimensions,
                 in_channels,
                 out_channels_first,
@@ -190,7 +190,7 @@ class EncodingBlock(nn.Module):
             out_channels_second = out_channels_first
         elif dimensions == 3:
             out_channels_second = 2 * out_channels_first
-        self.conv2 = get_conv_block(
+        self.conv2 = ConvolutionalBlock(
             dimensions,
             out_channels_first,
             out_channels_second,
@@ -213,9 +213,7 @@ class EncodingBlock(nn.Module):
 
     @property
     def out_channels(self):
-        last_conv_layer_idx = -1 if self.preactivation else 0
-        last_conv_layer = self.conv2[last_conv_layer_idx]
-        return last_conv_layer.out_channels
+        return self.conv2.conv_layer.out_channels
 
 
 class Decoder(nn.Module):
@@ -267,11 +265,11 @@ class DecodingBlock(nn.Module):
             self.upsample = get_upsampling_layer(dimensions, upsampling_type)
         in_channels = in_channels_skip_connection * (1 + 2)
         out_channels = in_channels_skip_connection
-        self.conv1 = get_conv_block(
+        self.conv1 = ConvolutionalBlock(
             dimensions, in_channels, out_channels,
             normalization=normalization, preactivation=preactivation)
         in_channels = out_channels
-        self.conv2 = get_conv_block(
+        self.conv2 = ConvolutionalBlock(
             dimensions, in_channels, out_channels,
             normalization=normalization, preactivation=preactivation)
 
@@ -293,6 +291,59 @@ class DecodingBlock(nn.Module):
         pad = -torch.stack((half_crop, half_crop)).t().flatten()
         skip_connection = F.pad(skip_connection, pad.tolist())
         return skip_connection
+
+
+class ConvolutionalBlock(nn.Module):
+    def __init__(
+            self,
+            dimensions: int,
+            in_channels: int,
+            out_channels: int,
+            normalization: Optional[str] = None,
+            kernel_size: int = 3,
+            activation: Optional[str] = 'ReLU',
+            preactivation: bool = False,
+        ):
+        super().__init__()
+
+        block = nn.ModuleList()
+
+        conv_class = getattr(nn, f'Conv{dimensions}d')
+        conv_layer = conv_class(in_channels, out_channels, kernel_size)
+
+        norm_layer = None
+        if normalization is not None:
+            norm_class = getattr(
+                nn, f'{normalization.capitalize()}Norm{dimensions}d')
+            num_features = in_channels if preactivation else out_channels
+            norm_layer = norm_class(num_features)
+
+        activation_layer = None
+        if activation is not None:
+            activation_layer = getattr(nn, activation)()
+
+        if preactivation:
+            self.add_if_not_none(block, norm_layer)
+            self.add_if_not_none(block, activation_layer)
+            self.add_if_not_none(block, conv_layer)
+        else:
+            self.add_if_not_none(block, conv_layer)
+            self.add_if_not_none(block, norm_layer)
+            self.add_if_not_none(block, activation_layer)
+
+        self.conv_layer = conv_layer
+        self.norm_layer = norm_layer
+        self.activation_layer = activation_layer
+
+        self.block = nn.Sequential(*block)
+
+    def forward(self, x):
+        return self.block(x)
+
+    def add_if_not_none(self, module_list, module):
+        if module is not None:
+            module_list.append(module)
+
 
 
 def get_conv_block(
