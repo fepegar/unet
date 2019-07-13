@@ -94,6 +94,7 @@ class UNet2D(UNet):
 
 class UNet3D(UNet):
     def __init__(self, *args, **user_kwargs):
+        kwargs = {}
         kwargs['dimensions'] = 3
         kwargs['num_encoding_blocks'] = 4
         kwargs['out_channels_first_layer'] = 32
