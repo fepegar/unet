@@ -20,6 +20,7 @@ class UNet(nn.Module):
         normalization=None,
         pooling_type='max',
         upsampling_type='conv',
+        preactivation=False,
         ):
         super().__init__()
         depth = num_encoding_blocks - 1
@@ -32,6 +33,7 @@ class UNet(nn.Module):
             pooling_type,
             depth,
             normalization,
+            preactivation=preactivation,
         )
 
         # Bottom (last encoding block)
@@ -46,6 +48,7 @@ class UNet(nn.Module):
             dimensions,
             normalization,
             pooling_type=None,
+            preactivation=preactivation,
         )
 
         # Decoder
@@ -63,6 +66,7 @@ class UNet(nn.Module):
             upsampling_type,
             num_decoding_blocks,
             normalization,
+            preactivation=preactivation,
         )
 
         # Classifier
@@ -112,9 +116,12 @@ class Encoder(nn.Module):
         pooling_type: str,
         num_encoding_blocks: int,
         normalization: Optional[str],
+        preactivation: bool = False,
         ):
         super().__init__()
+
         self.encoding_blocks = nn.ModuleList()
+        is_first_block = True
         for _ in range(num_encoding_blocks):
             encoding_block = EncodingBlock(
                 in_channels,
@@ -122,7 +129,10 @@ class Encoder(nn.Module):
                 dimensions,
                 normalization,
                 pooling_type,
+                preactivation,
+                is_first_block=is_first_block,
             )
+            is_first_block = False
             self.encoding_blocks.append(encoding_block)
             if dimensions == 2:
                 in_channels = out_channels_first
@@ -144,35 +154,6 @@ class Encoder(nn.Module):
         return self.encoding_blocks[-1].out_channels
 
 
-class Decoder(nn.Module):
-    def __init__(
-        self,
-        in_channels: int,
-        in_channels_skip_connection: int,
-        dimensions: int,
-        upsampling_type: str,
-        num_decoding_blocks: int,
-        normalization: Optional[str],
-        ):
-        super().__init__()
-        self.decoding_blocks = nn.ModuleList()
-        for _ in range(num_decoding_blocks):
-            decoding_block = DecodingBlock(
-                in_channels_skip_connection,
-                dimensions,
-                upsampling_type,
-                normalization,
-            )
-            self.decoding_blocks.append(decoding_block)
-            in_channels_skip_connection //= 2
-
-    def forward(self, skip_connections, x):
-        zipped = zip(reversed(skip_connections), self.decoding_blocks)
-        for skip_connection, decoding_block in zipped:
-            x = decoding_block(skip_connection, x)
-        return x
-
-
 class EncodingBlock(nn.Module):
     def __init__(
         self,
@@ -181,14 +162,30 @@ class EncodingBlock(nn.Module):
         dimensions: int,
         normalization: Optional[str],
         pooling_type: Optional[str],
+        preactivation: bool,
+        is_first_block: bool = False,
         ):
         super().__init__()
-        self.conv1 = get_conv_block(
-            dimensions,
-            in_channels,
-            out_channels_first,
-            normalization=normalization,
-        )
+
+        self.preactivation = preactivation  # needed for out_channels propoerty
+
+        if is_first_block:
+            self.conv1 = get_conv_block(
+                dimensions,
+                in_channels,
+                out_channels_first,
+                normalization=None,
+                activation=None,
+            )
+        else:
+            self.conv1 = get_conv_block(
+                dimensions,
+                in_channels,
+                out_channels_first,
+                normalization,
+                preactivation=preactivation,
+            )
+
         if dimensions == 2:
             out_channels_second = out_channels_first
         elif dimensions == 3:
@@ -198,6 +195,7 @@ class EncodingBlock(nn.Module):
             out_channels_first,
             out_channels_second,
             normalization=normalization,
+            preactivation=preactivation,
         )
         self.downsample = None
         if pooling_type is not None:
@@ -215,7 +213,40 @@ class EncodingBlock(nn.Module):
 
     @property
     def out_channels(self):
-        return self.conv2[0].out_channels
+        last_conv_layer_idx = -1 if self.preactivation else 0
+        last_conv_layer = self.conv2[last_conv_layer_idx]
+        return last_conv_layer.out_channels
+
+
+class Decoder(nn.Module):
+    def __init__(
+        self,
+        in_channels: int,
+        in_channels_skip_connection: int,
+        dimensions: int,
+        upsampling_type: str,
+        num_decoding_blocks: int,
+        normalization: Optional[str],
+        preactivation: bool = False,
+        ):
+        super().__init__()
+        self.decoding_blocks = nn.ModuleList()
+        for _ in range(num_decoding_blocks):
+            decoding_block = DecodingBlock(
+                in_channels_skip_connection,
+                dimensions,
+                upsampling_type,
+                normalization,
+                preactivation,
+            )
+            self.decoding_blocks.append(decoding_block)
+            in_channels_skip_connection //= 2
+
+    def forward(self, skip_connections, x):
+        zipped = zip(reversed(skip_connections), self.decoding_blocks)
+        for skip_connection, decoding_block in zipped:
+            x = decoding_block(skip_connection, x)
+        return x
 
 
 class DecodingBlock(nn.Module):
@@ -225,6 +256,7 @@ class DecodingBlock(nn.Module):
         dimensions: int,
         upsampling_type: str,
         normalization: Optional[str],
+        preactivation: bool,
         ):
         super().__init__()
         if upsampling_type == 'conv':
@@ -236,10 +268,12 @@ class DecodingBlock(nn.Module):
         in_channels = in_channels_skip_connection * (1 + 2)
         out_channels = in_channels_skip_connection
         self.conv1 = get_conv_block(
-            dimensions, in_channels, out_channels, normalization=normalization)
+            dimensions, in_channels, out_channels,
+            normalization=normalization, preactivation=preactivation)
         in_channels = out_channels
         self.conv2 = get_conv_block(
-            dimensions, in_channels, out_channels, normalization=normalization)
+            dimensions, in_channels, out_channels,
+            normalization=normalization, preactivation=preactivation)
 
     def forward(self, skip_connection, x):
         x = self.upsample(x)
@@ -267,20 +301,39 @@ def get_conv_block(
         out_channels: int,
         normalization: Optional[str] = None,
         kernel_size: int = 3,
-        activation: str = 'ReLU',
-        ):
+        activation: Optional[str] = 'ReLU',
+        preactivation: bool = False,
+    ) -> nn.Module:
+
+    def add_if_not_none(module_list, module):
+        if module is not None:
+            module_list.append(module)
+
     block = nn.ModuleList()
+
     conv_class = getattr(nn, f'Conv{dimensions}d')
     conv_layer = conv_class(in_channels, out_channels, kernel_size)
-    block.append(conv_layer)
+
+    norm_layer = None
     if normalization is not None:
         norm_class = getattr(
             nn, f'{normalization.capitalize()}Norm{dimensions}d')
-        norm_layer = norm_class(out_channels)
-        block.append(norm_layer)
+        num_features = in_channels if preactivation else out_channels
+        norm_layer = norm_class(num_features)
+
+    activation_layer = None
     if activation is not None:
         activation_layer = getattr(nn, activation)()
-        block.append(activation_layer)
+
+    if preactivation:
+        add_if_not_none(block, norm_layer)
+        add_if_not_none(block, activation_layer)
+        add_if_not_none(block, conv_layer)
+    else:
+        add_if_not_none(block, conv_layer)
+        add_if_not_none(block, norm_layer)
+        add_if_not_none(block, activation_layer)
+
     return nn.Sequential(*block)
 
 def get_downsampling_layer(
@@ -304,18 +357,20 @@ def get_conv_transpose_layer(dimensions, in_channels, out_channels):
 
 
 def main():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     model: UNet
 
-    model = UNet2D()
+    model = UNet2D(normalization='batch', preactivation=True).to(device).eval()
     print(model)
-    x_sample = torch.rand(1, 1, 572, 572)
+    x_sample = torch.rand(1, 1, 572, 572, device=device)
     with torch.no_grad():
         y = model(x_sample)
     print(y.shape)
 
-    model = UNet3D()
+    model = UNet3D(normalization='batch', preactivation=True).to(device).eval()
     print(model)
-    x_sample = torch.rand(1, 1, 132, 132, 116)
+    x_sample = torch.rand(1, 1, 132, 132, 116, device=device)
     with torch.no_grad():
         y = model(x_sample)
     print(y.shape)
