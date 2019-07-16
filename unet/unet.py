@@ -1,9 +1,10 @@
-from typing import Optional, Union, Callable, List
+from typing import Optional, Union, Callable
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+__all__ = ['UNet', 'UNet2D', 'UNet3D']
 
 CHANNELS_DIMENSION = 1
 
