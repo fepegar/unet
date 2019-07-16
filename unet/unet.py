@@ -22,9 +22,14 @@ class UNet(nn.Module):
             upsampling_type: str = 'conv',
             preactivation: bool = False,
             residual: bool = False,
+            padding: bool = False,
         ):
         super().__init__()
         depth = num_encoding_blocks - 1
+
+        # Force padding if residual blocks
+        if residual:
+            padding = 1
 
         # Encoder
         self.encoder = Encoder(
@@ -36,6 +41,7 @@ class UNet(nn.Module):
             normalization,
             preactivation=preactivation,
             residual=residual,
+            padding=padding,
         )
 
         # Bottom (last encoding block)
@@ -52,6 +58,7 @@ class UNet(nn.Module):
             pooling_type=None,
             preactivation=preactivation,
             residual=residual,
+            padding=padding,
         )
 
         # Decoder
@@ -63,14 +70,14 @@ class UNet(nn.Module):
         in_channels_skip_connection = out_channels_first_layer * 2**m
         num_decoding_blocks = depth
         self.decoder = Decoder(
-            in_channels,
             in_channels_skip_connection,
             dimensions,
             upsampling_type,
             num_decoding_blocks,
-            normalization,
+            normalization=normalization,
             preactivation=preactivation,
             residual=residual,
+            padding=padding,
         )
 
         # Classifier
@@ -122,6 +129,7 @@ class Encoder(nn.Module):
             normalization: Optional[str],
             preactivation: bool = False,
             residual: bool = False,
+            padding: int = 0,
         ):
         super().__init__()
 
@@ -137,6 +145,7 @@ class Encoder(nn.Module):
                 preactivation,
                 is_first_block=is_first_block,
                 residual=residual,
+                padding=padding,
             )
             is_first_block = False
             self.encoding_blocks.append(encoding_block)
@@ -171,6 +180,7 @@ class EncodingBlock(nn.Module):
             preactivation: bool = False,
             is_first_block: bool = False,
             residual: bool = False,
+            padding: int = 0,
         ):
         super().__init__()
 
@@ -178,7 +188,6 @@ class EncodingBlock(nn.Module):
         self.normalization = normalization
 
         self.residual = residual
-        padding = 1 if residual else 0
 
         if is_first_block:
             normalization = None
@@ -191,9 +200,9 @@ class EncodingBlock(nn.Module):
             dimensions,
             in_channels,
             out_channels_first,
-            padding=padding,
             normalization=normalization,
             preactivation=preactivation,
+            padding=padding,
         )
 
         if dimensions == 2:
@@ -247,7 +256,6 @@ class EncodingBlock(nn.Module):
 class Decoder(nn.Module):
     def __init__(
             self,
-            in_channels: int,
             in_channels_skip_connection: int,
             dimensions: int,
             upsampling_type: str,
@@ -255,6 +263,7 @@ class Decoder(nn.Module):
             normalization: Optional[str],
             preactivation: bool = False,
             residual: bool = False,
+            padding: int = 0,
         ):
         super().__init__()
         self.decoding_blocks = nn.ModuleList()
@@ -263,9 +272,10 @@ class Decoder(nn.Module):
                 in_channels_skip_connection,
                 dimensions,
                 upsampling_type,
-                normalization,
-                preactivation,
+                normalization=normalization,
+                preactivation=preactivation,
                 residual=residual,
+                padding=padding,
             )
             self.decoding_blocks.append(decoding_block)
             in_channels_skip_connection //= 2
@@ -286,11 +296,11 @@ class DecodingBlock(nn.Module):
             normalization: Optional[str],
             preactivation: bool = True,
             residual: bool = False,
+            padding: int = 0,
         ):
         super().__init__()
 
         self.residual = residual
-        padding = 1 if residual else 0
 
         if upsampling_type == 'conv':
             in_channels = out_channels = 2 * in_channels_skip_connection
