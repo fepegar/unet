@@ -10,17 +10,17 @@ CHANNELS_DIMENSION = 1
 
 class UNet(nn.Module):
     def __init__(
-        self,
-        in_channels: int = 1,
-        out_classes: int = 2,
-        dimensions: int = 2,
-        num_encoding_blocks: int = 5,
-        out_channels_first_layer: int = 64,
-        normalization: Optional[str] = None,
-        pooling_type: str = 'max',
-        upsampling_type: str = 'conv',
-        preactivation: bool = False,
-        residual: bool = False,
+            self,
+            in_channels: int = 1,
+            out_classes: int = 2,
+            dimensions: int = 2,
+            num_encoding_blocks: int = 5,
+            out_channels_first_layer: int = 64,
+            normalization: Optional[str] = None,
+            pooling_type: str = 'max',
+            upsampling_type: str = 'conv',
+            preactivation: bool = False,
+            residual: bool = False,
         ):
         super().__init__()
         depth = num_encoding_blocks - 1
@@ -112,15 +112,15 @@ class UNet3D(UNet):
 
 class Encoder(nn.Module):
     def __init__(
-        self,
-        in_channels: int,
-        out_channels_first: int,
-        dimensions: int,
-        pooling_type: str,
-        num_encoding_blocks: int,
-        normalization: Optional[str],
-        preactivation: bool = False,
-        residual: bool = False,
+            self,
+            in_channels: int,
+            out_channels_first: int,
+            dimensions: int,
+            pooling_type: str,
+            num_encoding_blocks: int,
+            normalization: Optional[str],
+            preactivation: bool = False,
+            residual: bool = False,
         ):
         super().__init__()
 
@@ -161,15 +161,15 @@ class Encoder(nn.Module):
 
 class EncodingBlock(nn.Module):
     def __init__(
-        self,
-        in_channels: int,
-        out_channels_first: int,
-        dimensions: int,
-        normalization: Optional[str],
-        pooling_type: Optional[str],
-        preactivation: bool = False,
-        is_first_block: bool = False,
-        residual: bool = False,
+            self,
+            in_channels: int,
+            out_channels_first: int,
+            dimensions: int,
+            normalization: Optional[str],
+            pooling_type: Optional[str],
+            preactivation: bool = False,
+            is_first_block: bool = False,
+            residual: bool = False,
         ):
         super().__init__()
 
@@ -245,15 +245,15 @@ class EncodingBlock(nn.Module):
 
 class Decoder(nn.Module):
     def __init__(
-        self,
-        in_channels: int,
-        in_channels_skip_connection: int,
-        dimensions: int,
-        upsampling_type: str,
-        num_decoding_blocks: int,
-        normalization: Optional[str],
-        preactivation: bool = False,
-        residual: bool = False,
+            self,
+            in_channels: int,
+            in_channels_skip_connection: int,
+            dimensions: int,
+            upsampling_type: str,
+            num_decoding_blocks: int,
+            normalization: Optional[str],
+            preactivation: bool = False,
+            residual: bool = False,
         ):
         super().__init__()
         self.decoding_blocks = nn.ModuleList()
@@ -278,13 +278,13 @@ class Decoder(nn.Module):
 
 class DecodingBlock(nn.Module):
     def __init__(
-        self,
-        in_channels_skip_connection: int,
-        dimensions: int,
-        upsampling_type: str,
-        normalization: Optional[str],
-        preactivation: bool = True,
-        residual: bool = False,
+            self,
+            in_channels_skip_connection: int,
+            dimensions: int,
+            upsampling_type: str,
+            normalization: Optional[str],
+            preactivation: bool = True,
+            residual: bool = False,
         ):
         super().__init__()
 
