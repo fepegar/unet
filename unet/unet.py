@@ -77,7 +77,7 @@ class UNet(nn.Module):
             in_channels = out_channels_first_layer
         elif dimensions == 3:
             in_channels = 2 * out_channels_first_layer
-        self.classifier = get_conv_block(
+        self.classifier = ConvolutionalBlock(
             dimensions, in_channels, out_classes,
             kernel_size=1, activation=None,
         )
@@ -407,47 +407,6 @@ class ConvolutionalBlock(nn.Module):
             module_list.append(module)
 
 
-def get_conv_block(
-        dimensions: int,
-        in_channels: int,
-        out_channels: int,
-        normalization: Optional[str] = None,
-        kernel_size: int = 3,
-        activation: Optional[str] = 'ReLU',
-        preactivation: bool = False,
-    ) -> nn.Module:
-
-    def add_if_not_none(module_list, module):
-        if module is not None:
-            module_list.append(module)
-
-    block = nn.ModuleList()
-
-    conv_class = getattr(nn, f'Conv{dimensions}d')
-    conv_layer = conv_class(in_channels, out_channels, kernel_size)
-
-    norm_layer = None
-    if normalization is not None:
-        norm_class = getattr(
-            nn, f'{normalization.capitalize()}Norm{dimensions}d')
-        num_features = in_channels if preactivation else out_channels
-        norm_layer = norm_class(num_features)
-
-    activation_layer = None
-    if activation is not None:
-        activation_layer = getattr(nn, activation)()
-
-    if preactivation:
-        add_if_not_none(block, norm_layer)
-        add_if_not_none(block, activation_layer)
-        add_if_not_none(block, conv_layer)
-    else:
-        add_if_not_none(block, conv_layer)
-        add_if_not_none(block, norm_layer)
-        add_if_not_none(block, activation_layer)
-
-    return nn.Sequential(*block)
-
 def get_downsampling_layer(
         dimensions: int,
         pooling_type: str,
@@ -457,7 +416,6 @@ def get_downsampling_layer(
     return class_(kernel_size)
 
 def get_upsampling_layer(
-        dimensions: int,
         upsampling_type: str,
     ) -> Union[nn.Module, Callable]:
     return lambda x: F.interpolate(x, scale_factor=2, mode=upsampling_type)
