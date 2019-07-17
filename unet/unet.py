@@ -23,6 +23,7 @@ class UNet(nn.Module):
             preactivation: bool = False,
             residual: bool = False,
             padding: bool = False,
+            padding_mode: str = 'zeros',
         ):
         super().__init__()
         depth = num_encoding_blocks - 1
@@ -42,6 +43,7 @@ class UNet(nn.Module):
             preactivation=preactivation,
             residual=residual,
             padding=padding,
+            padding_mode=padding_mode,
         )
 
         # Bottom (last encoding block)
@@ -59,6 +61,7 @@ class UNet(nn.Module):
             preactivation=preactivation,
             residual=residual,
             padding=padding,
+            padding_mode=padding_mode,
         )
 
         # Decoder
@@ -78,6 +81,7 @@ class UNet(nn.Module):
             preactivation=preactivation,
             residual=residual,
             padding=padding,
+            padding_mode=padding_mode,
         )
 
         # Classifier
@@ -130,6 +134,7 @@ class Encoder(nn.Module):
             preactivation: bool = False,
             residual: bool = False,
             padding: int = 0,
+            padding_mode: str = 'zeros',
         ):
         super().__init__()
 
@@ -146,6 +151,7 @@ class Encoder(nn.Module):
                 is_first_block=is_first_block,
                 residual=residual,
                 padding=padding,
+                padding_mode=padding_mode,
             )
             is_first_block = False
             self.encoding_blocks.append(encoding_block)
@@ -181,6 +187,7 @@ class EncodingBlock(nn.Module):
             is_first_block: bool = False,
             residual: bool = False,
             padding: int = 0,
+            padding_mode: str = 'zeros',
         ):
         super().__init__()
 
@@ -203,6 +210,7 @@ class EncodingBlock(nn.Module):
             normalization=normalization,
             preactivation=preactivation,
             padding=padding,
+            padding_mode=padding_mode,
         )
 
         if dimensions == 2:
@@ -264,6 +272,7 @@ class Decoder(nn.Module):
             preactivation: bool = False,
             residual: bool = False,
             padding: int = 0,
+            padding_mode: str = 'zeros',
         ):
         super().__init__()
         self.decoding_blocks = nn.ModuleList()
@@ -276,6 +285,7 @@ class Decoder(nn.Module):
                 preactivation=preactivation,
                 residual=residual,
                 padding=padding,
+                padding_mode=padding_mode,
             )
             self.decoding_blocks.append(decoding_block)
             in_channels_skip_connection //= 2
@@ -297,6 +307,7 @@ class DecodingBlock(nn.Module):
             preactivation: bool = True,
             residual: bool = False,
             padding: int = 0,
+            padding_mode: str = 'zeros',
         ):
         super().__init__()
 
@@ -317,6 +328,7 @@ class DecodingBlock(nn.Module):
             normalization=normalization,
             preactivation=preactivation,
             padding=padding,
+            padding_mode=padding_mode,
         )
         in_channels_second = out_channels
         self.conv2 = ConvolutionalBlock(
@@ -326,6 +338,7 @@ class DecodingBlock(nn.Module):
             normalization=normalization,
             preactivation=preactivation,
             padding=padding,
+            padding_mode=padding_mode,
         )
 
         if residual:
@@ -375,6 +388,7 @@ class ConvolutionalBlock(nn.Module):
             activation: Optional[str] = 'ReLU',
             preactivation: bool = False,
             padding: int = 0,
+            padding_mode: str = 'zeros',
         ):
         super().__init__()
 
@@ -382,7 +396,12 @@ class ConvolutionalBlock(nn.Module):
 
         conv_class = getattr(nn, f'Conv{dimensions}d')
         conv_layer = conv_class(
-            in_channels, out_channels, kernel_size, padding=padding)
+            in_channels,
+            out_channels,
+            kernel_size,
+            padding=padding,
+            padding_mode=padding_mode,
+        )
 
         norm_layer = None
         if normalization is not None:
