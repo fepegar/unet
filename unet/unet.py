@@ -24,7 +24,8 @@ class UNet(nn.Module):
             residual: bool = False,
             padding: bool = False,
             padding_mode: str = 'zeros',
-        ):
+            activation: Optional[str] = 'ReLU',
+            ):
         super().__init__()
         depth = num_encoding_blocks - 1
 
@@ -44,6 +45,7 @@ class UNet(nn.Module):
             residual=residual,
             padding=padding,
             padding_mode=padding_mode,
+            activation=activation,
         )
 
         # Bottom (last encoding block)
@@ -62,6 +64,7 @@ class UNet(nn.Module):
             residual=residual,
             padding=padding,
             padding_mode=padding_mode,
+            activation=activation,
         )
 
         # Decoder
@@ -82,6 +85,7 @@ class UNet(nn.Module):
             residual=residual,
             padding=padding,
             padding_mode=padding_mode,
+            activation=activation,
         )
 
         # Classifier
@@ -135,6 +139,7 @@ class Encoder(nn.Module):
             residual: bool = False,
             padding: int = 0,
             padding_mode: str = 'zeros',
+            activation: Optional[str] = 'ReLU',
         ):
         super().__init__()
 
@@ -152,6 +157,7 @@ class Encoder(nn.Module):
                 residual=residual,
                 padding=padding,
                 padding_mode=padding_mode,
+                activation=activation,
             )
             is_first_block = False
             self.encoding_blocks.append(encoding_block)
@@ -188,7 +194,8 @@ class EncodingBlock(nn.Module):
             residual: bool = False,
             padding: int = 0,
             padding_mode: str = 'zeros',
-        ):
+            activation: Optional[str] = 'ReLU',
+            ):
         super().__init__()
 
         self.preactivation = preactivation
@@ -198,7 +205,7 @@ class EncodingBlock(nn.Module):
 
         if is_first_block:
             normalization = None
-            activation = None
+            preactivation = None
         else:
             normalization = self.normalization
             preactivation = self.preactivation
@@ -211,6 +218,7 @@ class EncodingBlock(nn.Module):
             preactivation=preactivation,
             padding=padding,
             padding_mode=padding_mode,
+            activation=activation,
         )
 
         if dimensions == 2:
@@ -224,6 +232,7 @@ class EncodingBlock(nn.Module):
             normalization=self.normalization,
             preactivation=self.preactivation,
             padding=padding,
+            activation=activation,
         )
 
         if residual:
@@ -273,7 +282,8 @@ class Decoder(nn.Module):
             residual: bool = False,
             padding: int = 0,
             padding_mode: str = 'zeros',
-        ):
+            activation: Optional[str] = 'ReLU',
+            ):
         super().__init__()
         self.decoding_blocks = nn.ModuleList()
         for _ in range(num_decoding_blocks):
@@ -286,6 +296,7 @@ class Decoder(nn.Module):
                 residual=residual,
                 padding=padding,
                 padding_mode=padding_mode,
+                activation=activation,
             )
             self.decoding_blocks.append(decoding_block)
             in_channels_skip_connection //= 2
@@ -308,7 +319,8 @@ class DecodingBlock(nn.Module):
             residual: bool = False,
             padding: int = 0,
             padding_mode: str = 'zeros',
-        ):
+            activation: Optional[str] = 'ReLU',
+            ):
         super().__init__()
 
         self.residual = residual
@@ -329,6 +341,7 @@ class DecodingBlock(nn.Module):
             preactivation=preactivation,
             padding=padding,
             padding_mode=padding_mode,
+            activation=activation,
         )
         in_channels_second = out_channels
         self.conv2 = ConvolutionalBlock(
@@ -389,7 +402,7 @@ class ConvolutionalBlock(nn.Module):
             preactivation: bool = False,
             padding: int = 0,
             padding_mode: str = 'zeros',
-        ):
+            ):
         super().__init__()
 
         block = nn.ModuleList()
