@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name='unet',
-    version='0.1.2',
+    version='0.2.0',
     author='Fernando Perez-Garcia',
     author_email='fernando.perezgarcia.17@ucl.ac.uk',
     description='PyTorch implementation of UNet',
