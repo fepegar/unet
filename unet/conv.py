@@ -1,0 +1,71 @@
+from typing import Optional
+
+import torch.nn as nn
+
+
+class ConvolutionalBlock(nn.Module):
+    def __init__(
+            self,
+            dimensions: int,
+            in_channels: int,
+            out_channels: int,
+            normalization: Optional[str] = None,
+            kernel_size: int = 3,
+            activation: Optional[str] = 'ReLU',
+            preactivation: bool = False,
+            padding: bool = False,
+            padding_mode: str = 'zeros',
+            dilation: Optional[int] = None,
+            ):
+        super().__init__()
+
+        block = nn.ModuleList()
+
+        if padding:
+            total_padding = kernel_size + 2 * (dilation - 1) - 1
+            padding = total_padding // 2
+
+        conv_class = getattr(nn, f'Conv{dimensions}d')
+        dilation = 1 if dilation is None else dilation
+        conv_layer = conv_class(
+            in_channels,
+            out_channels,
+            kernel_size,
+            padding=padding,
+            padding_mode=padding_mode,
+            dilation=dilation,
+        )
+
+        norm_layer = None
+        if normalization is not None:
+            norm_class = getattr(
+                nn, f'{normalization.capitalize()}Norm{dimensions}d')
+            num_features = in_channels if preactivation else out_channels
+            norm_layer = norm_class(num_features)
+
+        activation_layer = None
+        if activation is not None:
+            activation_layer = getattr(nn, activation)()
+
+        if preactivation:
+            self.add_if_not_none(block, norm_layer)
+            self.add_if_not_none(block, activation_layer)
+            self.add_if_not_none(block, conv_layer)
+        else:
+            self.add_if_not_none(block, conv_layer)
+            self.add_if_not_none(block, norm_layer)
+            self.add_if_not_none(block, activation_layer)
+
+        self.conv_layer = conv_layer
+        self.norm_layer = norm_layer
+        self.activation_layer = activation_layer
+
+        self.block = nn.Sequential(*block)
+
+    def forward(self, x):
+        return self.block(x)
+
+    @staticmethod
+    def add_if_not_none(module_list, module):
+        if module is not None:
+            module_list.append(module)
