@@ -25,6 +25,7 @@ class UNet(nn.Module):
             padding: bool = False,
             padding_mode: str = 'zeros',
             activation: Optional[str] = 'ReLU',
+            initial_dilation: Optional[int] = None,
             ):
         super().__init__()
         depth = num_encoding_blocks - 1
@@ -46,6 +47,7 @@ class UNet(nn.Module):
             padding=padding,
             padding_mode=padding_mode,
             activation=activation,
+            initial_dilation=initial_dilation,
         )
 
         # Bottom (last encoding block)
@@ -54,6 +56,7 @@ class UNet(nn.Module):
             out_channels_first = 2 * in_channels
         else:
             out_channels_first = in_channels
+
         self.bottom_block = EncodingBlock(
             in_channels,
             out_channels_first,
@@ -65,6 +68,7 @@ class UNet(nn.Module):
             padding=padding,
             padding_mode=padding_mode,
             activation=activation,
+            dilation=self.encoder.dilation,
         )
 
         # Decoder
@@ -86,6 +90,7 @@ class UNet(nn.Module):
             padding=padding,
             padding_mode=padding_mode,
             activation=activation,
+            initial_dilation=self.encoder.dilation,
         )
 
         # Classifier
@@ -137,13 +142,15 @@ class Encoder(nn.Module):
             normalization: Optional[str],
             preactivation: bool = False,
             residual: bool = False,
-            padding: int = 0,
+            padding: bool = False,
             padding_mode: str = 'zeros',
             activation: Optional[str] = 'ReLU',
-        ):
+            initial_dilation: Optional[int] = None,
+            ):
         super().__init__()
 
         self.encoding_blocks = nn.ModuleList()
+        self.dilation = initial_dilation
         is_first_block = True
         for _ in range(num_encoding_blocks):
             encoding_block = EncodingBlock(
@@ -158,6 +165,7 @@ class Encoder(nn.Module):
                 padding=padding,
                 padding_mode=padding_mode,
                 activation=activation,
+                dilation=self.dilation,
             )
             is_first_block = False
             self.encoding_blocks.append(encoding_block)
@@ -167,6 +175,7 @@ class Encoder(nn.Module):
             elif dimensions == 3:
                 in_channels = 2 * out_channels_first
                 out_channels_first = in_channels
+            self.dilation = None if self.dilation is None else 2 * self.dilation
 
     def forward(self, x):
         skip_connections = []
@@ -192,9 +201,10 @@ class EncodingBlock(nn.Module):
             preactivation: bool = False,
             is_first_block: bool = False,
             residual: bool = False,
-            padding: int = 0,
+            padding: bool = False,
             padding_mode: str = 'zeros',
             activation: Optional[str] = 'ReLU',
+            dilation: Optional[int] = None,
             ):
         super().__init__()
 
@@ -219,6 +229,7 @@ class EncodingBlock(nn.Module):
             padding=padding,
             padding_mode=padding_mode,
             activation=activation,
+            dilation=dilation,
         )
 
         if dimensions == 2:
@@ -233,6 +244,7 @@ class EncodingBlock(nn.Module):
             preactivation=self.preactivation,
             padding=padding,
             activation=activation,
+            dilation=dilation,
         )
 
         if residual:
@@ -280,12 +292,14 @@ class Decoder(nn.Module):
             normalization: Optional[str],
             preactivation: bool = False,
             residual: bool = False,
-            padding: int = 0,
+            padding: bool = False,
             padding_mode: str = 'zeros',
             activation: Optional[str] = 'ReLU',
+            initial_dilation: Optional[int] = None,
             ):
         super().__init__()
         self.decoding_blocks = nn.ModuleList()
+        self.dilation = initial_dilation
         for _ in range(num_decoding_blocks):
             decoding_block = DecodingBlock(
                 in_channels_skip_connection,
@@ -297,9 +311,11 @@ class Decoder(nn.Module):
                 padding=padding,
                 padding_mode=padding_mode,
                 activation=activation,
+                dilation=self.dilation,
             )
             self.decoding_blocks.append(decoding_block)
             in_channels_skip_connection //= 2
+            self.dilation = None if self.dilation is None else self.dilation // 2
 
     def forward(self, skip_connections, x):
         zipped = zip(reversed(skip_connections), self.decoding_blocks)
@@ -317,9 +333,10 @@ class DecodingBlock(nn.Module):
             normalization: Optional[str],
             preactivation: bool = True,
             residual: bool = False,
-            padding: int = 0,
+            padding: bool = False,
             padding_mode: str = 'zeros',
             activation: Optional[str] = 'ReLU',
+            dilation: Optional[int] = None,
             ):
         super().__init__()
 
@@ -342,6 +359,7 @@ class DecodingBlock(nn.Module):
             padding=padding,
             padding_mode=padding_mode,
             activation=activation,
+            dilation=dilation,
         )
         in_channels_second = out_channels
         self.conv2 = ConvolutionalBlock(
@@ -352,6 +370,8 @@ class DecodingBlock(nn.Module):
             preactivation=preactivation,
             padding=padding,
             padding_mode=padding_mode,
+            activation=activation,
+            dilation=dilation,
         )
 
         if residual:
@@ -400,20 +420,27 @@ class ConvolutionalBlock(nn.Module):
             kernel_size: int = 3,
             activation: Optional[str] = 'ReLU',
             preactivation: bool = False,
-            padding: int = 0,
+            padding: bool = False,
             padding_mode: str = 'zeros',
+            dilation: Optional[int] = None,
             ):
         super().__init__()
 
         block = nn.ModuleList()
 
+        if padding:
+            total_padding = kernel_size + 2 * (dilation - 1) - 1
+            padding = total_padding // 2
+
         conv_class = getattr(nn, f'Conv{dimensions}d')
+        dilation = 1 if dilation is None else dilation
         conv_layer = conv_class(
             in_channels,
             out_channels,
             kernel_size,
             padding=padding,
             padding_mode=padding_mode,
+            dilation=dilation,
         )
 
         norm_layer = None
@@ -445,7 +472,8 @@ class ConvolutionalBlock(nn.Module):
     def forward(self, x):
         return self.block(x)
 
-    def add_if_not_none(self, module_list, module):
+    @staticmethod
+    def add_if_not_none(module_list, module):
         if module is not None:
             module_list.append(module)
 
@@ -454,14 +482,16 @@ def get_downsampling_layer(
         dimensions: int,
         pooling_type: str,
         kernel_size: int = 2,
-    ) -> nn.Module:
+        ) -> nn.Module:
     class_ = getattr(nn, f'{pooling_type.capitalize()}Pool{dimensions}d')
     return class_(kernel_size)
 
+
 def get_upsampling_layer(
         upsampling_type: str,
-    ) -> Union[nn.Module, Callable]:
+        ) -> Union[nn.Module, Callable]:
     return lambda x: F.interpolate(x, scale_factor=2, mode=upsampling_type)
+
 
 def get_conv_transpose_layer(dimensions, in_channels, out_channels):
     conv_class = getattr(nn, f'ConvTranspose{dimensions}d')
