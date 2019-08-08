@@ -21,12 +21,12 @@ class ConvolutionalBlock(nn.Module):
 
         block = nn.ModuleList()
 
+        dilation = 1 if dilation is None else dilation
         if padding:
             total_padding = kernel_size + 2 * (dilation - 1) - 1
             padding = total_padding // 2
 
         conv_class = getattr(nn, f'Conv{dimensions}d')
-        dilation = 1 if dilation is None else dilation
         conv_layer = conv_class(
             in_channels,
             out_channels,
