@@ -31,6 +31,7 @@ class Decoder(nn.Module):
             initial_dilation: Optional[int] = None,
             ):
         super().__init__()
+        upsampling_type = fix_upsampling_type(upsampling_type, dimensions)
         self.decoding_blocks = nn.ModuleList()
         self.dilation = initial_dilation
         for _ in range(num_decoding_blocks):
@@ -157,3 +158,12 @@ def get_conv_transpose_layer(dimensions, in_channels, out_channels):
     conv_class = getattr(nn, f'ConvTranspose{dimensions}d')
     conv_layer = conv_class(in_channels, out_channels, kernel_size=2, stride=2)
     return conv_layer
+
+
+def fix_upsampling_type(upsampling_type: str, dimensions: int):
+    if upsampling_type == 'linear':
+        if dimensions == 2:
+            upsampling_type = 'bilinear'
+        elif dimensions == 3:
+            upsampling_type = 'trilinear'
+    return upsampling_type
