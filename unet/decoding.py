@@ -1,4 +1,4 @@
-from typing import Optional, Union, Callable
+from typing import Optional, Callable
 
 import torch
 import torch.nn as nn
@@ -7,7 +7,14 @@ import torch.nn.functional as F
 from .conv import ConvolutionalBlock
 
 CHANNELS_DIMENSION = 1
-
+INTERPOLATION_MODES = (
+    'nearest',
+    'linear',
+    'bilinear',
+    'bicubic',
+    'trilinear',
+    'area',
+)
 
 class Decoder(nn.Module):
     def __init__(
@@ -74,7 +81,7 @@ class DecodingBlock(nn.Module):
             self.upsample = get_conv_transpose_layer(
                 dimensions, in_channels, out_channels)
         else:
-            self.upsample = get_upsampling_layer(dimensions, upsampling_type)
+            self.upsample = get_upsampling_layer(upsampling_type)
         in_channels_first = in_channels_skip_connection * (1 + 2)
         out_channels = in_channels_skip_connection
         self.conv1 = ConvolutionalBlock(
@@ -137,9 +144,13 @@ class DecodingBlock(nn.Module):
         return skip_connection
 
 
-def get_upsampling_layer(
-        upsampling_type: str,
-        ) -> Union[nn.Module, Callable]:
+def get_upsampling_layer(upsampling_type: str) -> Callable:
+    if upsampling_type not in INTERPOLATION_MODES:
+        message = (
+            f'Upsampling type is "{upsampling_type}"'
+            f' but should be one of the following: {INTERPOLATION_MODES}'
+        )
+        raise ValueError(message)
     return lambda x: F.interpolate(x, scale_factor=2, mode=upsampling_type)
 
 
