@@ -29,6 +29,7 @@ class Decoder(nn.Module):
             padding_mode: str = 'zeros',
             activation: Optional[str] = 'ReLU',
             initial_dilation: Optional[int] = None,
+            dropout: float = 0,
             ):
         super().__init__()
         upsampling_type = fix_upsampling_type(upsampling_type, dimensions)
@@ -46,6 +47,7 @@ class Decoder(nn.Module):
                 padding_mode=padding_mode,
                 activation=activation,
                 dilation=self.dilation,
+                dropout=dropout,
             )
             self.decoding_blocks.append(decoding_block)
             in_channels_skip_connection //= 2
@@ -71,6 +73,7 @@ class DecodingBlock(nn.Module):
             padding_mode: str = 'zeros',
             activation: Optional[str] = 'ReLU',
             dilation: Optional[int] = None,
+            dropout: float = 0,
             ):
         super().__init__()
 
@@ -94,6 +97,7 @@ class DecodingBlock(nn.Module):
             padding_mode=padding_mode,
             activation=activation,
             dilation=dilation,
+            dropout=dropout,
         )
         in_channels_second = out_channels
         self.conv2 = ConvolutionalBlock(
@@ -106,6 +110,7 @@ class DecodingBlock(nn.Module):
             padding_mode=padding_mode,
             activation=activation,
             dilation=dilation,
+            dropout=dropout,
         )
 
         if residual:

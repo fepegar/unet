@@ -24,6 +24,7 @@ class UNet(nn.Module):
             padding_mode: str = 'zeros',
             activation: Optional[str] = 'ReLU',
             initial_dilation: Optional[int] = None,
+            dropout: float = 0,
             ):
         super().__init__()
         depth = num_encoding_blocks - 1
@@ -46,6 +47,7 @@ class UNet(nn.Module):
             padding_mode=padding_mode,
             activation=activation,
             initial_dilation=initial_dilation,
+            dropout=dropout,
         )
 
         # Bottom (last encoding block)
@@ -67,6 +69,7 @@ class UNet(nn.Module):
             padding_mode=padding_mode,
             activation=activation,
             dilation=self.encoder.dilation,
+            dropout=dropout,
         )
 
         # Decoder
@@ -89,6 +92,7 @@ class UNet(nn.Module):
             padding_mode=padding_mode,
             activation=activation,
             initial_dilation=self.encoder.dilation,
+            dropout=dropout,
         )
 
         # Classifier
