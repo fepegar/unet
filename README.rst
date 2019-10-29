@@ -3,8 +3,8 @@ unet
 ====
 
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3352316.svg
-        :target: https://doi.org/10.5281/zenodo.3352316
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3522306.svg
+        :target: https://doi.org/10.5281/zenodo.3522306
         :alt: DOI
 
 .. image:: https://img.shields.io/badge/License-MIT-yellow.svg
@@ -44,7 +44,7 @@ Credits
 
 If you used this code for your research, please cite this repository using the
 information available on its
-`Zenodo entry <https://doi.org/10.5281/zenodo.3352316>`_.
+`Zenodo entry <https://doi.org/10.5281/zenodo.3522306>`_.
 
 
 This package was created with Cookiecutter_
