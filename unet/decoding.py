@@ -1,4 +1,4 @@
-from typing import Optional, Callable
+from typing import Optional
 
 import torch
 import torch.nn as nn
@@ -14,6 +14,7 @@ UPSAMPLING_MODES = (
     'bicubic',
     'trilinear',
 )
+
 
 class Decoder(nn.Module):
     def __init__(
@@ -51,7 +52,8 @@ class Decoder(nn.Module):
             )
             self.decoding_blocks.append(decoding_block)
             in_channels_skip_connection //= 2
-            self.dilation = None if self.dilation is None else self.dilation // 2
+            if self.dilation is not None:
+                self.dilation //= 2
 
     def forward(self, skip_connections, x):
         zipped = zip(reversed(skip_connections), self.decoding_blocks)

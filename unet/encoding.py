@@ -49,7 +49,8 @@ class Encoder(nn.Module):
             elif dimensions == 3:
                 in_channels = 2 * out_channels_first
                 out_channels_first = in_channels
-            self.dilation = None if self.dilation is None else 2 * self.dilation
+            if self.dilation is not None:
+                self.dilation *= 2
 
     def forward(self, x):
         skip_connections = []
@@ -60,7 +61,6 @@ class Encoder(nn.Module):
 
     @property
     def out_channels(self):
-        b = self.encoding_blocks[-1]
         return self.encoding_blocks[-1].out_channels
 
 
