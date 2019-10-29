@@ -23,7 +23,7 @@ test_requirements = [ ]
 setup(
     author="Fernando Perez-Garcia",
     author_email='fernando.perezgarcia.17@ucl.ac.uk',
-    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',
+    python_requires='>=3.5',
     classifiers=[
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
