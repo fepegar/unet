@@ -27,7 +27,8 @@ class ConvolutionalBlock(nn.Module):
             total_padding = kernel_size + 2 * (dilation - 1) - 1
             padding = total_padding // 2
 
-        conv_class = getattr(nn, f'Conv{dimensions}d')
+        class_name = 'Conv{}d'.format(dimensions)
+        conv_class = getattr(nn, class_name)
         conv_layer = conv_class(
             in_channels,
             out_channels,
@@ -39,8 +40,9 @@ class ConvolutionalBlock(nn.Module):
 
         norm_layer = None
         if normalization is not None:
-            norm_class = getattr(
-                nn, f'{normalization.capitalize()}Norm{dimensions}d')
+            class_name = '{}Norm{}d'.format(
+                normalization.capitalize(), dimensions)
+            norm_class: nn.Module = getattr(nn, class_name)
             num_features = in_channels if preactivation else out_channels
             norm_layer = norm_class(num_features)
 
@@ -59,7 +61,8 @@ class ConvolutionalBlock(nn.Module):
 
         dropout_layer = None
         if dropout:
-            dropout_class = getattr(nn, f'Dropout{dimensions}d')
+            class_name = 'Dropout{}d'.format(dimensions)
+            dropout_class = getattr(nn, class_name)
             dropout_layer = dropout_class(p=dropout)
             self.add_if_not_none(block, dropout_layer)
 

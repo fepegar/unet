@@ -164,5 +164,6 @@ def get_downsampling_layer(
         pooling_type: str,
         kernel_size: int = 2,
         ) -> nn.Module:
-    class_ = getattr(nn, f'{pooling_type.capitalize()}Pool{dimensions}d')
+    class_name = '{}Pool{}d'.format(pooling_type.capitalize(), dimensions)
+    class_ = getattr(nn, class_name)
     return class_(kernel_size)

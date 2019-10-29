@@ -152,15 +152,17 @@ class DecodingBlock(nn.Module):
 def get_upsampling_layer(upsampling_type: str) -> nn.Upsample:
     if upsampling_type not in UPSAMPLING_MODES:
         message = (
-            f'Upsampling type is "{upsampling_type}"'
-            f' but should be one of the following: {UPSAMPLING_MODES}'
+            'Upsampling type is "{}"'
+            ' but should be one of the following: {}'
         )
+        message = message.format(upsampling_type, UPSAMPLING_MODES)
         raise ValueError(message)
     return nn.Upsample(scale_factor=2, mode=upsampling_type)
 
 
 def get_conv_transpose_layer(dimensions, in_channels, out_channels):
-    conv_class = getattr(nn, f'ConvTranspose{dimensions}d')
+    class_name = 'ConvTranspose{}d'.format(dimensions)
+    conv_class = getattr(nn, class_name)
     conv_layer = conv_class(in_channels, out_channels, kernel_size=2, stride=2)
     return conv_layer
 
