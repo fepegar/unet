@@ -3,6 +3,10 @@ unet
 ====
 
 
+.. image:: https://img.shields.io/badge/License-MIT-yellow.svg
+        :target: https://opensource.org/licenses/MIT
+        :alt: License
+
 .. image:: https://img.shields.io/pypi/v/unet.svg
         :target: https://pypi.python.org/pypi/unet
 
@@ -12,7 +16,6 @@ unet
 .. image:: https://readthedocs.org/projects/unet/badge/?version=latest
         :target: https://unet.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
-
 
 .. image:: https://pyup.io/repos/github/fepegar/unet/shield.svg
      :target: https://pyup.io/repos/github/fepegar/unet/
