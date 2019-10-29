@@ -2,7 +2,6 @@
 
 language: python
 python:
-  - 3.8
   - 3.7
   - 3.6
   - 3.5
@@ -27,4 +26,4 @@ deploy:
   on:
     tags: true
     repo: fepegar/unet
-    python: 3.8
+    python: 3.7
