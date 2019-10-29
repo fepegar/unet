@@ -42,7 +42,7 @@ class ConvolutionalBlock(nn.Module):
         if normalization is not None:
             class_name = '{}Norm{}d'.format(
                 normalization.capitalize(), dimensions)
-            norm_class: nn.Module = getattr(nn, class_name)
+            norm_class = getattr(nn, class_name)
             num_features = in_channels if preactivation else out_channels
             norm_layer = norm_class(num_features)
 
