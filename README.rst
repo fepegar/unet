@@ -3,6 +3,10 @@ unet
 ====
 
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3352316.svg
+        :target: https://doi.org/10.5281/zenodo.3352316
+        :alt: DOI
+
 .. image:: https://img.shields.io/badge/License-MIT-yellow.svg
         :target: https://opensource.org/licenses/MIT
         :alt: License
@@ -38,7 +42,13 @@ Features
 Credits
 -------
 
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
+If you used this code for your research, please cite this repository using the
+information available on its
+`Zenodo entry <https://doi.org/10.5281/zenodo.3352316>`_.
+
+
+This package was created with Cookiecutter_
+and the `audreyr/cookiecutter-pypackage`_ project template.
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
