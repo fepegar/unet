@@ -1,4 +1,3 @@
-__version__ = '0.2.0'
+__version__ = '0.6.7'
 
 from .unet import *
-

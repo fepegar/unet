@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+"""Main module."""
+
 from typing import Optional
 import torch.nn as nn
 from .encoding import Encoder, EncodingBlock

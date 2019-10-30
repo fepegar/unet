@@ -1,23 +1,54 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""The setup script."""
+
 from setuptools import setup, find_packages
 
-with open('README.md', 'r') as fh:
-    long_description = fh.read()
+with open('README.rst') as readme_file:
+    readme = readme_file.read()
+
+with open('HISTORY.rst') as history_file:
+    history = history_file.read()
+
+requirements = [
+    'Click>=7.0',
+    'torch>=1.1',
+]
+
+setup_requirements = [ ]
+
+test_requirements = [ ]
 
 setup(
-    name='unet',
-    version='0.4.0',
-    author='Fernando Perez-Garcia',
+    author="Fernando Perez-Garcia",
     author_email='fernando.perezgarcia.17@ucl.ac.uk',
-    description='PyTorch implementation of UNet',
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    url='https://github.com/fepegar/unet',
-    packages=find_packages(),
+    python_requires='>=3.5',
     classifiers=[
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: MIT License',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-        'Intended Audience :: Science/Research',
     ],
+    description="PyTorch implementation of 2D and 3D U-Net",
+    entry_points={
+        'console_scripts': [
+            'unet=unet.cli:main',
+        ],
+    },
+    install_requires=requirements,
+    license="MIT license",
+    long_description=readme + '\n\n' + history,
+    include_package_data=True,
+    keywords='unet',
+    name='unet',
+    packages=find_packages(include=['unet', 'unet.*']),
+    setup_requires=setup_requirements,
+    test_suite='tests',
+    tests_require=test_requirements,
+    url='https://github.com/fepegar/unet',
+    version='0.6.7',
+    zip_safe=False,
 )
