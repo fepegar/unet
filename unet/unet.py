@@ -25,6 +25,7 @@ class UNet(nn.Module):
             activation: Optional[str] = 'ReLU',
             initial_dilation: Optional[int] = None,
             dropout: float = 0,
+            monte_carlo_dropout: float = 0,
             ):
         super().__init__()
         depth = num_encoding_blocks - 1
@@ -74,11 +75,11 @@ class UNet(nn.Module):
 
         # Decoder
         if dimensions == 2:
-            m = depth - 1
+            power = depth - 1
         elif dimensions == 3:
-            m = depth
+            power = depth
         in_channels = self.bottom_block.out_channels
-        in_channels_skip_connection = out_channels_first_layer * 2**m
+        in_channels_skip_connection = out_channels_first_layer * 2**power
         num_decoding_blocks = depth
         self.decoder = Decoder(
             in_channels_skip_connection,
@@ -94,6 +95,12 @@ class UNet(nn.Module):
             initial_dilation=self.encoder.dilation,
             dropout=dropout,
         )
+
+        # Monte Carlo dropout
+        self.monte_carlo_layer = None
+        if monte_carlo_dropout:
+            dropout_class = getattr(nn, f'Dropout{dimensions}d')
+            self.monte_carlo_layer = dropout_class(p=monte_carlo_dropout)
 
         # Classifier
         if dimensions == 2:
