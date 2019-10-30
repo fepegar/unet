@@ -103,7 +103,7 @@ class UNet(nn.Module):
         # Monte Carlo dropout
         self.monte_carlo_layer = None
         if monte_carlo_dropout:
-            dropout_class = getattr(nn, f'Dropout{dimensions}d')
+            dropout_class = getattr(nn, 'Dropout{}d'.format(dimensions))
             self.monte_carlo_layer = dropout_class(p=monte_carlo_dropout)
 
         # Classifier
