@@ -27,7 +27,9 @@ unet
 
 
 
-PyTorch implementation of 2D and 3D U-Net
+PyTorch implementation of 2D and 3D U-Net.
+
+The U-Net architecture was first described in `Ronneberger et al. 2015, *U-Net: Convolutional Networks for Biomedical Image Segmentation* <https://arxiv.org/abs/1505.04597>`_. The 3D version was described in `Çiçek et al. 2016, *3D U-Net: Learning Dense Volumetric Segmentation from Sparse Annotation* <https://arxiv.org/abs/1606.06650>`_.
 
 
 * Free software: MIT license
