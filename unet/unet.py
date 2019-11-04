@@ -24,7 +24,7 @@ class UNet(nn.Module):
             upsampling_type: str = 'conv',
             preactivation: bool = False,
             residual: bool = False,
-            padding: bool = False,
+            padding: int = 0,
             padding_mode: str = 'zeros',
             activation: Optional[str] = 'ReLU',
             initial_dilation: Optional[int] = None,

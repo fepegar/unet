@@ -13,7 +13,7 @@ class ConvolutionalBlock(nn.Module):
             kernel_size: int = 3,
             activation: Optional[str] = 'ReLU',
             preactivation: bool = False,
-            padding: bool = False,
+            padding: int = 0,
             padding_mode: str = 'zeros',
             dilation: Optional[int] = None,
             dropout: float = 0,
