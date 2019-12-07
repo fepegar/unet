@@ -36,10 +36,12 @@ The U-Net architecture was first described in `Ronneberger et al. 2015, U-Net: C
 * Documentation: https://unet.readthedocs.io.
 
 
-Features
+Installation
 --------
 
-* TODO
+::
+
+   pip install unet
 
 Credits
 -------
