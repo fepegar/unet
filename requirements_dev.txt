@@ -1,10 +1,10 @@
-pip==19.2.3
+pip==19.3.1
 bump2version==0.5.11
 wheel==0.33.6
 watchdog==0.9.0
-flake8==3.7.8
+flake8==3.7.9
 tox==3.14.0
-coverage==4.5.4
 Sphinx==2.3.1
-twine==1.14.0
+coverage==5.0.2
+twine==3.1.1
 Click==7.0
