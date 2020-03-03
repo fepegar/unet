@@ -12,8 +12,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'Click>=7.0',
-    'torch>=1.1',
+    'torch',
 ]
 
 setup_requirements = [ ]
@@ -23,7 +22,7 @@ test_requirements = [ ]
 setup(
     author="Fernando Perez-Garcia",
     author_email='fernando.perezgarcia.17@ucl.ac.uk',
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     classifiers=[
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
