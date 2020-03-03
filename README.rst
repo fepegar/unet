@@ -24,6 +24,14 @@ The 3D version was described in
 Sparse Annotation <https://arxiv.org/abs/1606.06650>`_.
 
 
+Installation
+------------
+
+::
+
+   pip install unet
+
+
 Credits
 -------
 
