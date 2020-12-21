@@ -29,6 +29,7 @@ class ConvolutionalBlock(nn.Module):
 
         class_name = 'Conv{}d'.format(dimensions)
         conv_class = getattr(nn, class_name)
+        no_bias = not preactivation and (normalization is not None)
         conv_layer = conv_class(
             in_channels,
             out_channels,
@@ -36,6 +37,7 @@ class ConvolutionalBlock(nn.Module):
             padding=padding,
             padding_mode=padding_mode,
             dilation=dilation,
+            bias=not no_bias,
         )
 
         norm_layer = None
