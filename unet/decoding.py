@@ -159,7 +159,12 @@ def get_upsampling_layer(upsampling_type: str) -> nn.Upsample:
         )
         message = message.format(upsampling_type, UPSAMPLING_MODES)
         raise ValueError(message)
-    return nn.Upsample(scale_factor=2, mode=upsampling_type)
+    upsample = nn.Upsample(
+        scale_factor=2,
+        mode=upsampling_type,
+        align_corners=False,
+    )
+    return upsample
 
 
 def get_conv_transpose_layer(dimensions, in_channels, out_channels):
