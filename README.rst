@@ -37,4 +37,6 @@ Credits
 
 If you used this code for your research, please cite this repository using the
 information available on its
-`Zenodo entry <https://doi.org/10.5281/zenodo.3522306>`_.
+`Zenodo entry <https://doi.org/10.5281/zenodo.3697931>`_:
+
+    Pérez-García, Fernando. (2020). fepegar/unet: PyTorch implementation of 2D and 3D U-Net (v0.7.5). Zenodo. https://doi.org/10.5281/zenodo.3697931
