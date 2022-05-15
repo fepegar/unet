@@ -143,7 +143,7 @@ class DecodingBlock(nn.Module):
         skip_shape = torch.tensor(skip_connection.shape)
         x_shape = torch.tensor(x.shape)
         crop = skip_shape[2:] - x_shape[2:]
-        half_crop = crop // 2
+        half_crop = (crop / 2).int()
         # If skip_connection is 10, 20, 30 and x is (6, 14, 12)
         # Then pad will be (-2, -2, -3, -3, -9, -9)
         pad = -torch.stack((half_crop, half_crop)).t().flatten()
