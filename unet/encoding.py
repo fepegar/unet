@@ -143,7 +143,7 @@ class EncodingBlock(nn.Module):
             connection = self.conv_residual(x)
             x = self.conv1(x)
             x = self.conv2(x)
-            x += connection
+            x = x + connection
         else:
             x = self.conv1(x)
             x = self.conv2(x)
