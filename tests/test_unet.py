@@ -43,7 +43,7 @@ filepath = Path(__file__).absolute()
 tests_dir = filepath.parent
 unet_dir = tests_dir.parent
 sys.path.append(str(unet_dir))
-from unet import UNet2D, UNet3D
+from unet import UNet1D, UNet2D, UNet3D
 
 residual = False
 
@@ -54,6 +54,28 @@ def run(model, shape):
     with torch.no_grad():
         y = model(x_sample)
     return y
+
+def test_unet_1d():
+    model = UNet1D(
+        normalization='batch',
+        preactivation=True,
+        residual=False,
+    ).to(device).eval()
+    shape = 1, 1, 572
+    result = 1, 2, 388
+    y = run(model, shape)
+    assert tuple(y.shape) == result
+
+def test_unet_1d_residual():
+    model = UNet1D(
+        normalization='batch',
+        preactivation=True,
+        residual=True,
+    ).to(device).eval()
+    shape = 1, 1, 512
+    result = 1, 2, 512
+    y = run(model, shape)
+    assert tuple(y.shape) == result
 
 def test_unet_2d():
     model = UNet2D(
