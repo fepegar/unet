@@ -8,7 +8,7 @@ from .encoding import Encoder, EncodingBlock
 from .decoding import Decoder
 from .conv import ConvolutionalBlock
 
-__all__ = ['UNet', 'UNet2D', 'UNet3D']
+__all__ = ['UNet', 'UNet1D', 'UNet2D', 'UNet3D']
 
 
 class UNet(nn.Module):
@@ -57,7 +57,7 @@ class UNet(nn.Module):
 
         # Bottom (last encoding block)
         in_channels = self.encoder.out_channels
-        if dimensions == 2:
+        if dimensions in (1, 2):
             out_channels_first = 2 * in_channels
         else:
             out_channels_first = in_channels
@@ -78,7 +78,7 @@ class UNet(nn.Module):
         )
 
         # Decoder
-        if dimensions == 2:
+        if dimensions in (1, 2):
             power = depth - 1
         elif dimensions == 3:
             power = depth
@@ -107,7 +107,7 @@ class UNet(nn.Module):
             self.monte_carlo_layer = dropout_class(p=monte_carlo_dropout)
 
         # Classifier
-        if dimensions == 2:
+        if dimensions in (1, 2):
             in_channels = out_channels_first_layer
         elif dimensions == 3:
             in_channels = 2 * out_channels_first_layer
@@ -123,6 +123,16 @@ class UNet(nn.Module):
         if self.monte_carlo_layer is not None:
             x = self.monte_carlo_layer(x)
         return self.classifier(x)
+
+
+class UNet1D(UNet):
+    def __init__(self, *args, **user_kwargs):
+        kwargs = {}
+        kwargs["dimensions"] = 1
+        kwargs["num_encoding_blocks"] = 5
+        kwargs["out_channels_first_layer"] = 64
+        kwargs.update(user_kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class UNet2D(UNet):
