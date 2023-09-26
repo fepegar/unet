@@ -78,10 +78,10 @@ class UNet(nn.Module):
         )
 
         # Decoder
-        if dimensions == 2:
-            power = depth - 1
-        elif dimensions == 3:
+        if dimensions == 3:
             power = depth
+        else:
+            power = depth - 1
         in_channels = self.bottom_block.out_channels
         in_channels_skip_connection = out_channels_first_layer * 2**power
         num_decoding_blocks = depth

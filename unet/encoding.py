@@ -108,9 +108,9 @@ class EncodingBlock(nn.Module):
             dropout=dropout,
         )
 
-        if dimensions == 2:
-            out_channels_second = out_channels_first
-        elif dimensions == 3:
+        if dimensions == 3:
+            out_channels_second = 2 * out_channels_first
+        else:
             out_channels_second = 2 * out_channels_first
         self.conv2 = ConvolutionalBlock(
             dimensions,
