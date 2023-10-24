@@ -43,7 +43,7 @@ class Encoder(nn.Module):
             )
             is_first_block = False
             self.encoding_blocks.append(encoding_block)
-            if dimensions == 2:
+            if dimensions in (1, 2):
                 in_channels = out_channels_first
                 out_channels_first = in_channels * 2
             elif dimensions == 3:
@@ -108,7 +108,7 @@ class EncodingBlock(nn.Module):
             dropout=dropout,
         )
 
-        if dimensions == 2:
+        if dimensions in (1, 2):
             out_channels_second = out_channels_first
         elif dimensions == 3:
             out_channels_second = 2 * out_channels_first
