@@ -14,7 +14,7 @@ U-Net
         :target: https://pypi.python.org/pypi/unet
 
 
-PyTorch implementation of 2D and 3D U-Net.
+PyTorch implementation of 1D, 2D and 3D U-Net.
 
 The U-Net architecture was first described in
 `Ronneberger et al. 2015, U-Net: Convolutional Networks for Biomedical Image
