@@ -5,19 +5,19 @@ import torch.nn as nn
 
 class ConvolutionalBlock(nn.Module):
     def __init__(
-            self,
-            dimensions: int,
-            in_channels: int,
-            out_channels: int,
-            normalization: Optional[str] = None,
-            kernel_size: int = 3,
-            activation: Optional[str] = 'ReLU',
-            preactivation: bool = False,
-            padding: int = 0,
-            padding_mode: str = 'zeros',
-            dilation: Optional[int] = None,
-            dropout: float = 0,
-            ):
+        self,
+        dimensions: int,
+        in_channels: int,
+        out_channels: int,
+        normalization: Optional[str] = None,
+        kernel_size: int = 3,
+        activation: Optional[str] = "ReLU",
+        preactivation: bool = False,
+        padding: int = 0,
+        padding_mode: str = "zeros",
+        dilation: Optional[int] = None,
+        dropout: float = 0,
+    ):
         super().__init__()
 
         block = nn.ModuleList()
@@ -27,7 +27,7 @@ class ConvolutionalBlock(nn.Module):
             total_padding = kernel_size + 2 * (dilation - 1) - 1
             padding = total_padding // 2
 
-        class_name = 'Conv{}d'.format(dimensions)
+        class_name = "Conv{}d".format(dimensions)
         conv_class = getattr(nn, class_name)
         no_bias = not preactivation and (normalization is not None)
         conv_layer = conv_class(
@@ -42,8 +42,7 @@ class ConvolutionalBlock(nn.Module):
 
         norm_layer = None
         if normalization is not None:
-            class_name = '{}Norm{}d'.format(
-                normalization.capitalize(), dimensions)
+            class_name = "{}Norm{}d".format(normalization.capitalize(), dimensions)
             norm_class = getattr(nn, class_name)
             num_features = in_channels if preactivation else out_channels
             norm_layer = norm_class(num_features)
@@ -63,7 +62,7 @@ class ConvolutionalBlock(nn.Module):
 
         dropout_layer = None
         if dropout:
-            class_name = 'Dropout{}d'.format(dimensions)
+            class_name = "Dropout{}d".format(dimensions)
             dropout_class = getattr(nn, class_name)
             dropout_layer = dropout_class(p=dropout)
             self.add_if_not_none(block, dropout_layer)

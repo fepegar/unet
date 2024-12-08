@@ -5,21 +5,21 @@ from .conv import ConvolutionalBlock
 
 class Encoder(nn.Module):
     def __init__(
-            self,
-            in_channels: int,
-            out_channels_first: int,
-            dimensions: int,
-            pooling_type: str,
-            num_encoding_blocks: int,
-            normalization: Optional[str],
-            preactivation: bool = False,
-            residual: bool = False,
-            padding: int = 0,
-            padding_mode: str = 'zeros',
-            activation: Optional[str] = 'ReLU',
-            initial_dilation: Optional[int] = None,
-            dropout: float = 0,
-            ):
+        self,
+        in_channels: int,
+        out_channels_first: int,
+        dimensions: int,
+        pooling_type: str,
+        num_encoding_blocks: int,
+        normalization: Optional[str],
+        preactivation: bool = False,
+        residual: bool = False,
+        padding: int = 0,
+        padding_mode: str = "zeros",
+        activation: Optional[str] = "ReLU",
+        initial_dilation: Optional[int] = None,
+        dropout: float = 0,
+    ):
         super().__init__()
 
         self.encoding_blocks = nn.ModuleList()
@@ -66,21 +66,21 @@ class Encoder(nn.Module):
 
 class EncodingBlock(nn.Module):
     def __init__(
-            self,
-            in_channels: int,
-            out_channels_first: int,
-            dimensions: int,
-            normalization: Optional[str],
-            pooling_type: Optional[str],
-            preactivation: bool = False,
-            is_first_block: bool = False,
-            residual: bool = False,
-            padding: int = 0,
-            padding_mode: str = 'zeros',
-            activation: Optional[str] = 'ReLU',
-            dilation: Optional[int] = None,
-            dropout: float = 0,
-            ):
+        self,
+        in_channels: int,
+        out_channels_first: int,
+        dimensions: int,
+        normalization: Optional[str],
+        pooling_type: Optional[str],
+        preactivation: bool = False,
+        is_first_block: bool = False,
+        residual: bool = False,
+        padding: int = 0,
+        padding_mode: str = "zeros",
+        activation: Optional[str] = "ReLU",
+        dilation: Optional[int] = None,
+        dropout: float = 0,
+    ):
         super().__init__()
 
         self.preactivation = preactivation
@@ -160,10 +160,10 @@ class EncodingBlock(nn.Module):
 
 
 def get_downsampling_layer(
-        dimensions: int,
-        pooling_type: str,
-        kernel_size: int = 2,
-        ) -> nn.Module:
-    class_name = '{}Pool{}d'.format(pooling_type.capitalize(), dimensions)
+    dimensions: int,
+    pooling_type: str,
+    kernel_size: int = 2,
+) -> nn.Module:
+    class_name = "{}Pool{}d".format(pooling_type.capitalize(), dimensions)
     class_ = getattr(nn, class_name)
     return class_(kernel_size)

@@ -8,29 +8,29 @@ from .encoding import Encoder, EncodingBlock
 from .decoding import Decoder
 from .conv import ConvolutionalBlock
 
-__all__ = ['UNet', 'UNet1D', 'UNet2D', 'UNet3D']
+__all__ = ["UNet", "UNet1D", "UNet2D", "UNet3D"]
 
 
 class UNet(nn.Module):
     def __init__(
-            self,
-            in_channels: int = 1,
-            out_classes: int = 2,
-            dimensions: int = 2,
-            num_encoding_blocks: int = 5,
-            out_channels_first_layer: int = 64,
-            normalization: Optional[str] = None,
-            pooling_type: str = 'max',
-            upsampling_type: str = 'conv',
-            preactivation: bool = False,
-            residual: bool = False,
-            padding: int = 0,
-            padding_mode: str = 'zeros',
-            activation: Optional[str] = 'ReLU',
-            initial_dilation: Optional[int] = None,
-            dropout: float = 0,
-            monte_carlo_dropout: float = 0,
-            ):
+        self,
+        in_channels: int = 1,
+        out_classes: int = 2,
+        dimensions: int = 2,
+        num_encoding_blocks: int = 5,
+        out_channels_first_layer: int = 64,
+        normalization: Optional[str] = None,
+        pooling_type: str = "max",
+        upsampling_type: str = "conv",
+        preactivation: bool = False,
+        residual: bool = False,
+        padding: int = 0,
+        padding_mode: str = "zeros",
+        activation: Optional[str] = "ReLU",
+        initial_dilation: Optional[int] = None,
+        dropout: float = 0,
+        monte_carlo_dropout: float = 0,
+    ):
         super().__init__()
         depth = num_encoding_blocks - 1
 
@@ -103,7 +103,7 @@ class UNet(nn.Module):
         # Monte Carlo dropout
         self.monte_carlo_layer = None
         if monte_carlo_dropout:
-            dropout_class = getattr(nn, 'Dropout{}d'.format(dimensions))
+            dropout_class = getattr(nn, "Dropout{}d".format(dimensions))
             self.monte_carlo_layer = dropout_class(p=monte_carlo_dropout)
 
         # Classifier
@@ -112,8 +112,11 @@ class UNet(nn.Module):
         elif dimensions == 3:
             in_channels = 2 * out_channels_first_layer
         self.classifier = ConvolutionalBlock(
-            dimensions, in_channels, out_classes,
-            kernel_size=1, activation=None,
+            dimensions,
+            in_channels,
+            out_classes,
+            kernel_size=1,
+            activation=None,
         )
 
     def forward(self, x):
@@ -138,9 +141,9 @@ class UNet1D(UNet):
 class UNet2D(UNet):
     def __init__(self, *args, **user_kwargs):
         kwargs = {}
-        kwargs['dimensions'] = 2
-        kwargs['num_encoding_blocks'] = 5
-        kwargs['out_channels_first_layer'] = 64
+        kwargs["dimensions"] = 2
+        kwargs["num_encoding_blocks"] = 5
+        kwargs["out_channels_first_layer"] = 64
         kwargs.update(user_kwargs)
         super().__init__(*args, **kwargs)
 
@@ -148,9 +151,9 @@ class UNet2D(UNet):
 class UNet3D(UNet):
     def __init__(self, *args, **user_kwargs):
         kwargs = {}
-        kwargs['dimensions'] = 3
-        kwargs['num_encoding_blocks'] = 4
-        kwargs['out_channels_first_layer'] = 32
-        kwargs['normalization'] = 'batch'
+        kwargs["dimensions"] = 3
+        kwargs["num_encoding_blocks"] = 4
+        kwargs["out_channels_first_layer"] = 32
+        kwargs["normalization"] = "batch"
         kwargs.update(user_kwargs)
         super().__init__(*args, **kwargs)
