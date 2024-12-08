@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "unet"
+version = "0.7.9"
+description = "PyTorch implementation of 1D, 2D and 3D U-Net."
+authors = [{ name = "Fernando Perez-Garcia", email = "fepegar@gmail.com" }]
+readme = { file = "README.rst", content-type = "text/x-rst" }
+requires-python = ">=3.9,<3.13"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = ["torch"]
+
+[project.urls]
+Homepage = "https://github.com/fepegar/unet"
+Source = "https://github.com/fepegar/unet"
+"Issue tracker" = "https://github.com/fepegar/unet/issues"
+
+[dependency-groups]
+dev = ["bump-my-version", "pytest", "pytest-sugar", "ruff", "tox-uv"]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # isort
+    "I",
+]
