@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "unet"
-version = "0.8.0"
+version = "0.8.1"
 description = "PyTorch implementation of 1D, 2D and 3D U-Net."
 authors = [{ name = "Fernando Perez-Garcia", email = "fepegar@gmail.com" }]
 readme = { file = "README.rst", content-type = "text/x-rst" }
