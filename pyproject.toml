@@ -8,16 +8,12 @@ version = "0.8.0"
 description = "PyTorch implementation of 1D, 2D and 3D U-Net."
 authors = [{ name = "Fernando Perez-Garcia", email = "fepegar@gmail.com" }]
 readme = { file = "README.rst", content-type = "text/x-rst" }
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.9"
 classifiers = [
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
 ]
 dependencies = ["torch"]
 
